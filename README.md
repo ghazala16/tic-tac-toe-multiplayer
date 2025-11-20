@@ -60,3 +60,15 @@ npm install @heroiclabs/nakama-js
 bash
 Copy code
 npm run dev
+
+Game Flow Diagram
+ Player A         Nakama Server      Player B
+    |                   |                |
+    |----- Join Matchmaker ------------> |
+    |                   |                |
+    |<-- Match Found / State Sync ------>|
+    |                   |                |
+    |---- Move -------> |                |
+    |                   | Broadcast Move |
+    |                   |---->--------- >|
+    |                   |                |

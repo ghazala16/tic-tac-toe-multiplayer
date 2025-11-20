@@ -11,3 +11,13 @@ export async function initSession(username) {
   console.log("Connected to Nakama!");
   return { session, socket };
 }
+
+export async function joinMatch(socket) {
+    const ticket = await socket.addMatchmaker(2, 2, {});
+    socket.onMatchmakerMatched = async (matched) => {
+      const matchId = matched.match_id;
+      await socket.joinMatch(matchId);
+      console.log("Joined match:", matchId);
+    };
+  }
+  
