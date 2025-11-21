@@ -52,7 +52,7 @@ end
 
 function M.match_leave(ctx, logger, nk, dispatcher, tick, state, presences)
     state.winner = "Opponent Left"
-    dispatcher.broadcast_message(1, state)
+    dispatcher.broadcast_message(1, nk.json_encode(state))
     return state
 end
 

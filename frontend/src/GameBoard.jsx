@@ -1,32 +1,55 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function GameBoard({ socket }) {
-  const [state, setState] = useState(null);
+export default function GameBoard({ socket, session }) {
+
+  const [game, setGame] = useState(null);
+  const [matchId, setMatchId] = useState(null);
+  const [playerSymbol, setPlayerSymbol] = useState(null);
 
   useEffect(() => {
     socket.onmatchdata = (msg) => {
-      const gameState = JSON.parse(new TextDecoder().decode(msg.data));
-      setState(gameState);
+      const json = JSON.parse(new TextDecoder().decode(msg.data));
+      setGame(json);
+
+      if (!playerSymbol && json.players) {
+        const symbols = Object.keys(json.players);
+        setPlayerSymbol(json.players[session.user_id]);
+      }
     };
   }, []);
 
   const sendMove = (i) => {
-    if (!state || state.winner) return;
+    if (!game || game.winner) return;
+
     const payload = {
       position: i + 1,
-      symbol: state.current_player
+      symbol: playerSymbol
     };
-    socket.sendMatchState(state.matchId, 1, payload);
+
+    socket.sendMatchState(matchId, 1, payload);
   };
 
   return (
-    <div className="board">
-      {state?.board?.map((cell, i) => (
-        <button key={i} className="cell" onClick={() => sendMove(i)}>
-          {cell}
-        </button>
-      ))}
-      {state?.winner && <h2>Winner: {state.winner}</h2>}
+    <div className="container">
+      <h2>
+        {game?.winner
+          ? `Winner: ${game.winner}`
+          : `Turn: ${game?.current_player}`}
+      </h2>
+
+      <div className="board">
+        {game?.board?.map((cell, i) => (
+          <button
+            key={i}
+            className="cell"
+            disabled={!!cell || game.winner}
+            onClick={() => sendMove(i)}
+          >
+            {cell}
+          </button>
+        ))}
+      </div>
+      <button onClick={requestRematch}>Play Again</button>
     </div>
   );
 }
